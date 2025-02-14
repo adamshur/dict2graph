@@ -4,6 +4,7 @@ import networkx as nx
 from tqdm import tqdm
 import joblib
 from config import PREPROCESSED_FILE, GRAPH_FILE
+import gc
 
 class DictionaryGraph:
     """Class to handle dictionary graph operations."""
@@ -64,36 +65,91 @@ class DictionaryGraph:
             print(f"Error saving graph: {str(e)}")
             return False
     
-    def load_graph(self):
-        """Load the graph from file."""
+    def load_subgraph(self, word, depth=2, max_neighbors=5):
+        """Load a subgraph centered around a specific word."""
         try:
-            self.graph = nx.read_gexf(GRAPH_FILE)
-            print(f"Loaded graph with {self.graph.number_of_nodes()} nodes and {self.graph.number_of_edges()} edges.")
-            return True
+            # Load the full graph first
+            full_graph = nx.read_gexf(GRAPH_FILE, node_type=str)
+            
+            if word not in full_graph:
+                return None
+            
+            # Initialize subgraph with the target word
+            nodes_to_include = {word}
+            current_layer = {word}
+            
+            # Expand the subgraph up to the specified depth
+            for _ in range(depth):
+                next_layer = set()
+                for node in current_layer:
+                    # Get successors (outgoing edges)
+                    successors = list(full_graph.successors(node))[:max_neighbors]
+                    next_layer.update(successors)
+                    nodes_to_include.update(successors)
+                    
+                    # Get predecessors (incoming edges)
+                    predecessors = list(full_graph.predecessors(node))[:max_neighbors]
+                    next_layer.update(predecessors)
+                    nodes_to_include.update(predecessors)
+                
+                current_layer = next_layer
+            
+            # Create the subgraph with the collected nodes
+            subgraph = full_graph.subgraph(nodes_to_include).copy()
+            
+            # Clean up the full graph to free memory
+            full_graph.clear()
+            del full_graph
+            gc.collect()
+            
+            return subgraph
+            
         except Exception as e:
-            print(f"Error loading graph: {str(e)}")
-            return False
+            print(f"Error loading subgraph: {str(e)}")
+            return None
     
     def get_graph_stats(self):
         """Get basic statistics about the graph."""
-        if not self.graph:
+        try:
+            graph = nx.read_gexf(GRAPH_FILE)
+            stats = {
+                "nodes": graph.number_of_nodes(),
+                "edges": graph.number_of_edges(),
+                "avg_degree": sum(dict(graph.degree()).values()) / graph.number_of_nodes()
+            }
+            graph.clear()
+            del graph
+            gc.collect()
+            return stats
+        except Exception:
             return None
-            
-        return {
-            "nodes": self.graph.number_of_nodes(),
-            "edges": self.graph.number_of_edges(),
-            "avg_degree": sum(dict(self.graph.degree()).values()) / self.graph.number_of_nodes()
-        }
     
     def get_word_connections(self, word, limit=10):
         """Get connections for a specific word."""
-        if not self.graph or word not in self.graph:
-            return None
+        try:
+            graph = nx.read_gexf(GRAPH_FILE)
+            if word not in graph:
+                return None
             
-        return {
-            "outgoing": list(self.graph.successors(word))[:limit],
-            "incoming": list(self.graph.predecessors(word))[:limit]
-        }
+            connections = {
+                "outgoing": list(graph.successors(word))[:limit],
+                "incoming": list(graph.predecessors(word))[:limit]
+            }
+            graph.clear()
+            del graph
+            gc.collect()
+            return connections
+        except Exception:
+            return None
+
+    def cleanup(self):
+        """Clean up resources and free memory."""
+        if self.graph:
+            self.graph.clear()
+            self.graph = None
+        if self.processed_data:
+            self.processed_data = None
+        gc.collect()
 
 def main():
     """Main function to build and save the graph."""
@@ -105,6 +161,7 @@ def main():
         print(f"Nodes: {stats['nodes']}")
         print(f"Edges: {stats['edges']}")
         print(f"Average Degree: {stats['avg_degree']:.2f}")
+        graph_handler.cleanup()
 
 if __name__ == '__main__':
     main()

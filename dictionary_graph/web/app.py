@@ -4,6 +4,7 @@ from flask import Flask, render_template, jsonify, request, Response
 import json
 from queue import Queue
 import logging
+import gc
 from ..visualization import GraphVisualizer
 
 # Initialize Flask app with correct template and static paths
@@ -16,9 +17,6 @@ logger = logging.getLogger(__name__)
 
 # Progress tracking
 progress_queues = {}
-
-# Initialize visualizer
-visualizer = GraphVisualizer()
 
 @app.route('/')
 def index():
@@ -43,12 +41,14 @@ def progress(word):
         finally:
             if word in progress_queues:
                 del progress_queues[word]
+            gc.collect()
     
     return Response(generate(), mimetype='text/event-stream')
 
 @app.route('/visualize', methods=['POST'])
 def visualize():
     """Create and return visualization data for the requested word."""
+    visualizer = None
     try:
         # Validate request
         if not request.is_json:
@@ -64,13 +64,16 @@ def visualize():
             return jsonify({'error': 'Invalid word provided'}), 400
 
         # Get visualization parameters with reasonable defaults
-        max_nodes = int(data.get('max_nodes', 50))
-        depth = int(data.get('depth', 2))
-        neighbor_limit = int(data.get('neighbor_limit', 5))
+        max_nodes = min(int(data.get('max_nodes', 50)), 100)  # Limit max nodes
+        depth = min(int(data.get('depth', 2)), 3)  # Limit depth
+        neighbor_limit = min(int(data.get('neighbor_limit', 5)), 10)  # Limit neighbors
 
         # Create a progress queue for this visualization
         progress_queue = Queue()
         progress_queues[word] = progress_queue
+
+        # Initialize visualizer for this request only
+        visualizer = GraphVisualizer()
 
         try:
             # Create visualization with progress tracking
@@ -98,6 +101,12 @@ def visualize():
     except Exception as e:
         logger.exception(f"Unexpected error in visualization endpoint: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
+        
+    finally:
+        # Ensure cleanup of visualizer resources
+        if visualizer:
+            del visualizer
+        gc.collect()
 
 def main():
     """Run the Flask application."""

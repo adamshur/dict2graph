@@ -48,6 +48,19 @@ This project demonstrates how we can transform traditional reference materials i
 
 The resulting graph becomes a powerful tool for linguistics research, education, and natural language processing applications.
 
+### Quick Start with Pre-processed Data
+
+This repository includes pre-processed data files:
+- Pre-built dictionary graph
+- Processed joblib files with NLP results
+
+This means you can skip the resource-intensive processing and graph building steps and jump straight to visualization:
+```bash
+python main.py serve
+```
+
+This will launch the web interface immediately with the pre-built graph, perfect for exploring the visualization without waiting for processing.
+
 ## Project Structure
 
 ```

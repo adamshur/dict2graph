@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dictionary Graph Visualizer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='lib/vis-9.1.2/vis-network.css') }}">
+    <script src="{{ url_for('static', filename='lib/vis-9.1.2/vis-network.min.js') }}"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="controls">
+            <h1>Dictionary Graph Visualizer</h1>
+            <div class="control-group">
+                <label for="word">Word:</label>
+                <input type="text" id="word" placeholder="Enter a word" required>
+            </div>
+            <div class="control-group">
+                <label for="max-nodes">Max Nodes:</label>
+                <input type="number" id="max-nodes" value="50" min="10" max="200">
+            </div>
+            <div class="control-group">
+                <label for="depth">Depth:</label>
+                <input type="number" id="depth" value="2" min="1" max="4">
+            </div>
+            <div class="control-group">
+                <label for="neighbor-limit">Neighbors per Node:</label>
+                <input type="number" id="neighbor-limit" value="5" min="1" max="20">
+            </div>
+            <div class="control-group">
+                <label>Relationship Directions:</label>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" id="outgoing" checked> Outgoing (words used in definition)</label>
+                    <label><input type="checkbox" id="incoming" checked> Incoming (words that use this in definition)</label>
+                </div>
+            </div>
+            <button id="visualize-btn">Visualize</button>
+        </div>
+        <div class="visualization">
+            <div id="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p id="progress-text">Generating visualization...</p>
+                <div class="progress-bar">
+                    <div id="progress-fill"></div>
+                </div>
+            </div>
+            <div id="legend">
+                <h3>Legend</h3>
+                <div class="legend-item">
+                    <span class="legend-color" style="background-color: #ff4444;"></span>
+                    <span>Target Word</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color" style="background-color: #44ff44;"></span>
+                    <span>Immediate Neighbors</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color" style="background-color: #97c2fc;"></span>
+                    <span>Other Words</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-arrow">→</span>
+                    <span>Definition Link</span>
+                </div>
+            </div>
+            <div id="network-container"></div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

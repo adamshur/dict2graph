@@ -4,6 +4,50 @@ A Python application that creates and visualizes a graph of word relationships b
 
 ![Dictionary Graph Example](example.png)
 
+## How It Works
+
+This project transforms a traditional dictionary into an interactive knowledge graph by analyzing the relationships between words based on their definitions. Here's the flow of data through the system:
+
+1. **Dictionary Input** (`data/dictionary.json`):
+   - Starts with a JSON file containing word-definition pairs
+   - Each entry maps a word to its definition text
+
+2. **NLP Processing** (`preprocessing.py`):
+   - Processes each definition using spaCy NLP
+   - Extracts key words and relationships
+   - Identifies parts of speech and word importance
+   - Filters out stop words and irrelevant terms
+
+3. **Graph Construction** (`graph.py`):
+   - Creates nodes for each dictionary word
+   - Establishes edges based on word appearances in definitions
+   - Weights connections by word importance
+   - Builds a NetworkX graph structure
+
+4. **Visualization Layer** (`visualization.py`):
+   - Converts NetworkX graph to vis.js format
+   - Applies visual styling and layout algorithms
+   - Prepares data for interactive display
+
+5. **Web Interface** (`web/`):
+   - Serves the interactive visualization
+   - Enables word search and exploration
+   - Provides real-time graph navigation
+   - Shows word relationships and paths
+
+### Why This Matters
+
+This project demonstrates how we can transform traditional reference materials into interactive knowledge networks. Such transformation offers several benefits:
+
+- **Discover Relationships**: Uncover connections between words that might not be obvious in a traditional dictionary
+- **Visual Learning**: See how language concepts relate to each other spatially
+- **Semantic Navigation**: Follow paths of meaning through the dictionary
+- **Research Tool**: Analyze language patterns and word clusters
+- **Educational Aid**: Help students understand word relationships and etymology
+- **Content Analysis**: Study how concepts are interconnected in specific domains
+
+The resulting graph becomes a powerful tool for linguistics research, education, and natural language processing applications.
+
 ## Project Structure
 
 ```

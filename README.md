@@ -159,17 +159,6 @@ Important production considerations:
 - Monitor server resources and logs
 - Set up proper user permissions
 
-## Security Features
-
-The application implements several security measures:
-- Rate limiting to prevent abuse
-- Input validation and sanitization
-- Request size limits
-- Security headers (CSP, HSTS, etc.)
-- Caching to improve performance
-- Resource usage limits
-- Error handling and logging
-
 ## Features
 
 - NLP-based dictionary processing using spaCy
@@ -208,27 +197,3 @@ The web interface uses several third-party libraries:
 - vis.js (v9.1.2) for graph visualization
 - tom-select for search autocomplete
 - Custom graph bindings for enhanced interactivity
-
-## Troubleshooting
-
-Common issues and solutions:
-
-1. **Memory Error during processing**:
-   - Increase available RAM
-   - Reduce dictionary size
-   - Adjust batch size in config.py
-
-2. **Slow graph loading**:
-   - Reduce graph complexity in config.py
-   - Use a more powerful server
-   - Enable caching
-
-3. **Missing spaCy model**:
-   - Run `python -m spacy download en_core_web_sm`
-   - Check internet connection
-   - Verify Python environment
-
-4. **Server timeout issues**:
-   - Increase gunicorn timeout
-   - Optimize graph operations
-   - Add request caching
